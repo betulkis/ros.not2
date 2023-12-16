@@ -1,0 +1,477 @@
+ Beginner: Client libraries » Using colcon to build packages  Paket oluşturmak için colcon'u kullanma
+ 
+ ROS çalışma alanı, belirli bir yapıya sahip bir dizindir. Genellikle bir "src" alt dizini vardır. Bu alt dizinin içinde ROS paketlerinin kaynak kodunun bulunacağı yer bulunur. Genellikle dizin aksi halde boş başlar.
+ 
+ colcon kaynak yapılardan yararlanıyor. Varsayılan olarak, src dizininin eşleri olarak aşağıdaki dizinleri oluşturacaktır:
+ 
+"Build" dizini ara dosyaların depolandığı yer olacaktır. Her paket için bir alt klasör oluşturulacaktır
+  
+"install" dizini her paketin kurulacağı yerdir. Varsayılan olarak her paket ayrı bir alt dizine kurulacaktır.
+  
+"Log" dizini her colcon çağrısı hakkında çeşitli günlük bilgilerini içerir.
+
+
+
+Catkin ile karşılaştırıldığında "devel" dizini yoktur.
+-----------------------------------
+Öncelikle çalışma alanımızı içerecek bir dizin (ros2_ws) oluşturun:
+
+mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws
+
+Bu noktada çalışma alanı tek bir boş dizin src içerir:
+
+.
+└── src
+
+1 directory, 0 files
+
+
+Bazı kaynaklar ekleyin
+
+Örnekler deposunu çalışma alanının src dizinine kopyalayalım:
+
+git clone https://github.com/ros2/examples src/examples -b foxy
+
+Artık çalışma alanı ROS 2 örneklerinin kaynak koduna sahip olmalıdır:
+
+
+colcon build --symlink-install
+
+.
+├── build
+├── install
+├── log
+└── src
+
+4 directories, 0 files
+
+Yeni oluşturduğumuz paketlere yönelik testleri çalıştırmak için aşağıdakileri çalıştırın:
+
+colcon test
+------------------
+
+Source the environment
+Çevreyi kaynaklayın
+
+Colcon oluşturmayı başarıyla tamamladığında çıktı kurulum dizininde olacaktır. Yüklü yürütülebilir dosyalardan veya kitaplıklardan herhangi birini kullanabilmeniz için bunları yolunuza ve kitaplık yollarınıza eklemeniz gerekir. colcon, ortamın kurulmasına yardımcı olmak için kurulum dizininde bash/bat dosyaları oluşturacaktır. Bu dosyalar gerekli tüm öğeleri yolunuza ve kitaplık yollarınıza ekleyecek ve ayrıca paketler tarafından dışa aktarılan bash veya kabuk komutlarını sağlayacaktır.
+
+source install/setup.bash 
+
+*******
+
+Bir demoyu deneyin
+
+Ortam kaynaklı olarak colcon tarafından oluşturulan yürütülebilir dosyaları çalıştırabiliriz. Örneklerden bir abone düğümü çalıştıralım:
+
+
+ros2 run examples_rclcpp_minimal_subscriber subscriber_member_function
+
+Başka bir terminalde bir yayıncı düğümü çalıştıralım (kurulum betiğini kaynaklamayı unutmayın):
+
+ros2 run examples_rclcpp_minimal_publisher publisher_member_function
+
+Yayıncıdan ve aboneden gelen sayıların arttığı mesajları görmelisiniz.
+publisher and subscriber
+
+----------------------------
+Kendi paketinizi oluşturun
+
+colcon birden fazla yapı türünü destekler. Önerilen derleme türleri ament_cmake ve ament_python'dur. Ayrıca saf cmake paketleri de desteklenmektedir.
+
+Ament_python yapısına bir örnek, setup.py'nin derleme için birincil giriş noktası olduğu ament_index_python paketidir.
+
+demo_nodes_cpp gibi bir paket ament_cmake derleme türünü kullanır ve derleme aracı olarak CMake'i kullanır.
+
+Kolaylık sağlamak için, şablona dayalı yeni bir paket oluşturmak için ros2 pkg create aracını kullanabilirsiniz.
+
+---------------
+
+Çalışma alanı, ROS 2 paketlerini içeren bir dizindir. ROS 2'yi kullanmadan önce, çalışmayı planladığınız terminaldeki ROS 2 kurulum çalışma alanınızı kaynaklamanız gerekir.
+ Bu, ROS 2'nin paketlerini o terminalde kullanmanız için kullanılabilir hale getirir.
+
+Ayrıca, genişlettiğiniz mevcut ROS 2 çalışma alanına veya "alt katmana" müdahale etmeden yeni paketler ekleyebileceğiniz ikincil bir çalışma 
+alanı olan bir "yer paylaşımı" sağlama seçeneğiniz de vardır. Alt paylaşımınız, kaplamanızdaki tüm paketlerin bağımlılıklarını içermelidir. Kaplamanızdaki paketler, alt katmandaki paketleri geçersiz kılacaktır. Ayrıca her ardışık kaplamanın ana altlık paketlerini kullandığı birkaç altlık ve kaplama katmanına sahip olmak da mümkündür.
+
+
+source /opt/ros/foxy/setup.bash
+
+!!
+ Yeni bir dizin oluşturun
+
+En iyi uygulama, her yeni çalışma alanı için yeni bir dizin oluşturmaktır. Adın önemi yok ancak çalışma alanının amacını belirtmesi faydalı olacaktır. “Geliştirme çalışma alanı” için ros2_ws dizin adını seçelim:
+
+mkdir -p ~/ros2_ws/src
+cd ~/ros2_ws/src
+
+!!
+
+Örnek bir repoyu klonlama
+
+Klonlamadan önce hâlâ ros2_ws/src dizininde olduğunuzdan emin olun.
+!!!
+Başlangıç ​​seviyesindeki geliştirici eğitimlerinin geri kalanında kendi paketlerinizi oluşturacaksınız ancak şimdilik mevcut paketleri kullanarak bir çalışma alanını bir araya getirme alıştırması yapacaksınız.
+
+Başlangıç: CLI Araçları eğitimlerini izlediyseniz ros_tutorials'taki paketlerden biri olan Turtlesim'e aşina olacaksınız.
+
+Bir repo birden fazla şubeye sahip olabilir. Kurulu ROS 2 dağıtımınızı hedef alan dağıtıma göz atmanız gerekir. Bu repoyu klonladığınızda -b argümanını ve ardından o dalı ekleyin.
+
+ros2_ws/src dizininde aşağıdaki komutu çalıştırın:
+
+git clone https://github.com/ros/ros_tutorials.git -b foxy-devel
+
+!!
+
+Artık ros_tutorials çalışma alanınıza kopyalandı. Ros_tutorials deposu, bu eğitimin geri kalanında kullanacağımız kaplumbağasim paketini içerir. Bu depodaki diğer paketler COLCON_IGNORE dosyası içerdikleri için oluşturulmamıştır.
+
+Şu ana kadar çalışma alanınızı örnek bir paketle doldurdunuz ancak bu henüz tam işlevsel bir çalışma alanı değil. Önce bağımlılıkları çözmeniz ve ardından çalışma alanını oluşturmanız gerekir.
+
+----
+
+Resolve Dependencies
+Bağımlılıkları çözme
+
+Çalışma alanını oluşturmadan önce paket bağımlılıklarını çözmeniz gerekir. Zaten tüm bağımlılıklara sahip olabilirsiniz, ancak en iyi uygulama, her klonladığınızda bağımlılıkları kontrol etmektir. Bağımlılıklarınızın eksik olduğunu fark etmek için uzun süre bekledikten sonra bir yapının başarısız olmasını istemezsiniz.
+
+Çalışma alanınızın kökünden (ros2_ws) aşağıdaki komutu çalıştırın:
+
+# cd eğer hala ``ros_tutorials`` klonuyla ``src`` dizinindeyseniz
+cd ..
+-----------------
+Çalışma alanını colcon ile oluşturun
+
+Artık çalışma alanınızın kökünden (ros2_ws) şu komutu kullanarak paketlerinizi oluşturabilirsiniz:
+
+colcon build
+---------
+Colcon yapısı için diğer yararlı argümanlar:
+
+    --packages-up-to istediğiniz paketi ve tüm bağımlılıklarını oluşturur, ancak çalışma alanının tamamını oluşturmaz (zaman kazandırır)
+
+    --symlink-install, sizi python komut dosyalarında her değişiklik yaptığınızda yeniden oluşturma zorunluluğundan kurtarır
+
+    --event-handlers console_direct+ derleme sırasında konsol çıktısını gösterir (aksi halde günlük dizininde bulunabilir)
+    
+   Derleme bittiğinde, çalışma alanının köküne (~/ros2_ws) ls yazın; colcon'un yeni dizinler oluşturduğunu göreceksiniz:
+  
+  
+    build  install  log  src
+    
+----------
+    
+source /opt/ros/foxy/setup.bash
+    
+    Çalışma alanınızın köküne gidin:
+
+cd ~/ros2_ws
+
+    Kökte, kaplamanızı kaynaklayın:
+    
+source install/local_setup.bash
+
+
+Kaplamanın local_setup'ının kaynaklanması yalnızca kaplamada mevcut olan paketleri ortamınıza ekleyecektir. kurulum, kaplamanın yanı sıra oluşturulduğu altlığı da kaynaklayarak her iki çalışma alanını da kullanmanıza olanak tanır.
+
+Yani, ana ROS 2 kurulumunuzun kurulumunu ve ardından ros2_ws kaplamasının local_setup'ını tedarik etmek, az önce yaptığınız gibi, sadece ros2_ws kurulumunu tedarik etmekle aynıdır çünkü buna alt katmanının ortamı da dahildir.
+
+Artık turtlesim paketini katmandan çalıştırabilirsiniz:
+
+ros2 run turtlesim turtlesim_node
+
+Ancak bunun ana kurulumunuzun "turtlesim"i değil de "turtlesim" kaplamasının (overlay) çalıştığını nasıl anlarsınız?
+
+Efektleri görebilmeniz için kaplamadaki "turtlesim"i değiştirelim:
+
+    Kaplamadaki paketleri alt katmandan ayrı olarak değiştirebilir ve yeniden oluşturabilirsiniz.
+
+    Kaplama, alt kaplamaya göre önceliklidir.
+    
+----------------------------------
+
+Kaplamayı değiştirin
+
+"Turtlesim" penceresindeki başlık çubuğunu düzenleyerek kaplamanızdaki "turtlesim"i değiştirebilirsiniz. Bunu yapmak için ~/ros2_ws/src/ros_tutorials/"turtlesim"/src konumunda "turtle"_frame.cpp dosyasını bulun. Turtle_frame.cpp'yi tercih ettiğiniz metin düzenleyiciyle açın.
+
+52. satırda setWindowTitle("TurtleSim"); fonksiyonunu göreceksiniz. "TurtleSim" değerini "MyTurtleSim" olarak değiştirin ve dosyayı kaydedin.
+
+Daha önce colcon build'i çalıştırdığınız ilk terminale dönün ve tekrar çalıştırın.
+
+İkinci terminale dönün (yer paylaşımının sağlandığı yer) ve Turtlesim'i tekrar çalıştırın:
+
+Turtlesim penceresindeki başlık çubuğunun artık “MyTurtleSim” yazdığını göreceksiniz.
+
+Ana ROS 2 ortamınız daha önce bu terminalden alınmış olsa da, ros2_ws ortamınızın kaplaması, alt katmanın içeriğine göre önceliklidir.
+
+Altlığınızın hala sağlam olduğunu görmek için yepyeni bir terminal açın ve yalnızca ROS 2 kurulumunuzu kaynaklayın. Turlusim'i tekrar çalıştırın:
+
+Kaplamadaki değişikliklerin aslında alt kaplamadaki hiçbir şeyi etkilemediğini görebilirsiniz.
+--------------
+CMake veya Python'u kullanarak yeni bir paket oluşturun ve yürütülebilir dosyasını çalıştırın.
+
+
+ROS 2 paketi nedir?
+
+Paket, ROS 2 kodunuz için bir organizasyon birimidir. Kodunuzu yükleyebilmek veya başkalarıyla paylaşabilmek istiyorsanız kodunuzun bir paket halinde düzenlenmesine ihtiyacınız olacaktır. Paketlerle ROS 2 çalışmanızı yayınlayabilir ve başkalarının onu kolayca oluşturmasına ve kullanmasına izin verebilirsiniz.
+
+ROS 2'de paket oluşturma, derleme sistemi olarak ament'i ve derleme aracı olarak colcon'u kullanır. Resmi olarak desteklenen CMake veya Python'u kullanarak bir paket oluşturabilirsiniz, ancak başka derleme türleri de mevcuttur.
+
+package.xml
+paketle ilgili meta bilgileri içeren dosya
+
+resource/<package_name>
+paket için işaretleyici dosyası
+
+setup.cfg
+Bir paket çalıştırılabilir dosyalara sahip olduğunda setup.cfg gereklidir
+böylece "ros2 run" onları bulabilir
+
+paketin nasıl kurulacağına ilişkin talimatları içeren setup.py
+
+<package_name> - paketinizi bulmak için ROS 2 araçları tarafından kullanılan, paketinizle aynı adı taşıyan bir dizin, __init__.py içerir
+
+
+
+Mümkün olan en basit paket şuna benzeyen bir dosya yapısına sahip olabilir:
+my_package/
+      package.xml
+      resource/my_package
+      setup.cfg
+      setup.py
+      my_package/
+      
+      
+Bir çalışma alanındaki 3 paket
+
+Tek bir çalışma alanı, her biri kendi klasöründe olmak üzere istediğiniz kadar paket içerebilir. Ayrıca tek bir çalışma alanında (CMake, Python vb.) farklı yapı türlerinden paketlere sahip olabilirsiniz. İç içe paketlere sahip olamazsınız.
+
+
+En iyi uygulama, çalışma alanınızda bir src klasörüne sahip olmak ve paketlerinizi orada oluşturmaktır. Bu, çalışma alanının en üst seviyesini “temiz” tutar
+---
+
+1 Bir paket oluşturun
+
+Öncelikle ROS 2 kurulumunuzu kaynaklayın.
+
+Yeni paketiniz için önceki eğitimde oluşturduğunuz ros2_ws çalışma alanını kullanalım.
+
+Paket oluşturma komutunu çalıştırmadan önce src klasöründe olduğunuzdan emin olun.
+
+cd ~/ros2_ws/src
+
+ROS 2'de yeni bir paket oluşturmak için komut sözdizimi şöyledir:
+
+ros2 pkg create --build-type ament_python <package_name>
+
+Bu eğitim için, pakette basit bir Merhaba Dünya türü yürütülebilir dosyası oluşturan isteğe bağlı --node-name argümanını kullanacaksınız.
+
+Terminalinize aşağıdaki komutu girin:
+
+ros2 pkg create --build-type ament_python --node-name my_node my_package
+
+Artık çalışma alanınızın src dizininde my_package adında yeni bir klasörünüz olacak.
+
+Yeni paket için otomatik olarak oluşturulan dosyaları görebilirsiniz.
+
+----
+2 Bir paket oluşturun
+
+Paketleri bir çalışma alanına koymak özellikle değerlidir çünkü çalışma alanı kökünde colcon build'i çalıştırarak aynı anda birçok paket oluşturabilirsiniz. Aksi takdirde her paketi ayrı ayrı oluşturmanız gerekir.
+
+Çalışma alanınızın köküne dönün:
+
+cd ~/ros2_ws
+
+deyince
+:~/ros2_ws/src$  artık  ~/ros2_ws$ olur
+
+Artık paketlerinizi oluşturabilirsiniz:
+
+
+colcon build
+
+Bir dahaki sefere yalnızca my_package paketini oluşturmak için şunu çalıştırabilirsin:
+
+colcon build --packages-select my_package
+
+--------
+3 Kurulum dosyasını kaynakla
+
+Yeni paketinizi ve çalıştırılabilir dosyanızı kullanmak için önce yeni bir terminal açın ve ana ROS 2 kurulumunuzu kaynakla
+
+Ardından, çalışma alanınıza kaynak sağlamak için ros2_ws dizininin içinden aşağıdaki komutu çalıştır:
+
+source install/local_setup.bash
+
+Artık çalışma alanınız yolunuza eklendiğine göre, yeni paketinizin yürütülebilir dosyalarını kullanabileceksiniz.
+------------
+4 Paketi kullanın
+
+Paket oluşturma sırasında --node-name bağımsız değişkenini kullanarak oluşturduğunuz yürütülebilir dosyayı çalıştırmak için şu komutu girin:
+
+ros2 run my_package my_node
+çıktı
+Hi from my_package.
+
+5 Paket içeriğini incele
+
+ros2_ws/src/my_package içinde ros2 pkg'nin otomatik olarak oluşturduğu dosya ve klasörleri göreceksin:
+
+
+my_package  package.xml  resource  setup.cfg  setup.py  test
+
+my_node.py my_package dizininin içindedir. Gelecekte tüm özel Python düğümlerinizin gideceği yer burasıdır.
+
+
+*özet *
+*******
+
+Adım 1: Paket Oluşturun
+
+
+# Önce ROS 2 kurulumunuzu kaynak olarak belirtin
+source /opt/ros/foxy/setup.bash
+
+# Çalışma alanınızın src dizinine gidin
+cd ~/ros2_ws/src
+
+# Yeni paketinizi oluşturun (örneğin, my_package adında bir paket oluşturun)
+ros2 pkg create --build-type ament_python --node-name my_node my_package
+
+
+
+Adım 2: Paketi Derleyin
+
+# Çalışma alanınızın kök dizinine gidin
+cd ~/ros2_ws
+
+# Tüm paketleri derleyin
+colcon build
+
+# Sadece oluşturduğunuz paketi derlemek istiyorsanız
+colcon build --packages-select my_package
+
+
+Adım 3: Setup Dosyasını Kaynak Yapın
+
+# Ana ROS 2 kurulumunuzu kaynak olarak belirtin
+source /opt/ros/foxy/setup.bash
+
+# Çalışma alanınızı kaynak olarak belirtin
+source install/local_setup.bash
+
+
+
+Adım 4: Paketi Kullanın
+
+
+# Oluşturduğunuz yürütülebilir dosyayı çalıştırın (örneğin, my_node)
+ros2 run my_package my_node
+
+
+
+
+Dökümandaki adımları takip ettiğinizde, ROS 2 paketinizi başarıyla oluşturup derledikten sonra aşağıdaki başlıklardan bazıları gerçekleşmiş olacak:
+
+    Paket Oluşturma:
+        ros2 pkg create komutuyla yeni bir paket oluşturdunuz.
+        Belirtilen adımları takip ederek, paketinizi src dizininde oluşturdunuz.
+
+    Paket Derleme:
+        colcon build komutuyla çalışma alanınızın tüm paketlerini derlediniz.
+        Opsiyonel olarak, colcon build --packages-select my_package komutuyla sadece oluşturduğunuz paketi derlediniz.
+
+    Setup Dosyasını Kaynak Yapma:
+        source install/local_setup.bash komutuyla çalışma alanınızı kaynak olarak belirttiniz. Bu, yeni paketinizi kullanabilmek için gerekli olan çeşitli ortam değişkenlerini ayarlar.
+
+    Paketi Kullanma:
+        ros2 run my_package my_node komutuyla oluşturduğunuz yürütülebilir dosyayı çalıştırdınız.
+
+Bu adımların ardından, ROS 2 paketinizi başarıyla oluşturup kullanabilirsiniz.
+
+----------------------------------------------------------------------------
+
+ROS 2'de Python kullanarak basit bir yayıncı (publisher) ve dinleyici (subscriber) oluşturma
+
+Bu yayıncı ve dinleyici, bir konu (topic) üzerinden birbirlerine string mesajları iletecekler. "Talker" (konuşan) ve "Listener" (dinleyici) adlı iki düğüm (node) örneği oluşturulacaktır.
+
+Görevler
+
+    Paket Oluşturma:
+Yeni bir terminal açın ve ROS 2 kurulumunuzu kaynak olarak belirtin.
+
+Önceki bir eğitimde oluşturduğunuz ros2_ws dizinine gidin.
+
+Paketinizi oluşturun:      
+
+source /opt/ros/foxy/setup.bash
+
+cd ~/ros2_ws/src
+
+ros2 pkg create --build-type ament_python py_pubsub
+
+Terminal, py_pubsub paketinin oluşturulduğuna dair bir mesaj verecektir.
+
+--
+Yayıncı Düğümü Oluşturma:
+
+Eğer zaten ros2_ws dizininde değilseniz, ros2_ws/src dizinine gidin. Bu adımı gerçekleştirmek için aşağıdaki komutları kullanabilirsiniz:
+
+cd ~/ros2_ws/src
+
+
+ros2_ws/src/py_pubsub/py_pubsub dizinine gidin:    ****
+    
+cd py_pubsub/py_pubsub
+
+
+Bu adımları takip ettikten sonra, şu an ros2_ws/src/py_pubsub/py_pubsub dizininde olmalısınız. Dizini kontrol etmek için terminaldeki komut istemcisine pwd komutunu yazabilirsiniz
+
+
+Örnek yayıncı kodunu indirin:  ******
+
+wget https://raw.githubusercontent.com/ros2/examples/foxy/rclpy/topics/minimal_publisher/examples_rclpy_minimal_publisher/publisher_member_function.py
+
+
+Yeni bir dosya olan publisher_member_function.py şimdi __init__.py dosyasının yanında bulunmalıdır.
+Bu dosyayı tercih ettiğiniz metin düzenleyici ile açın ve içeriğini inceleyin. Bu kod, basit bir yayıncı düğümü oluşturur ve belirli bir aralıkta "Hello World" mesajları yayınlar.  
+
+ publisher_member_function.py dosyasını açıp içeriğini incelemenizi sağlayabiliriz. Aşağıdaki adımları takip edebilirsiniz:
+
+    Dosyayı Açma:
+        Terminalde veya metin düzenleyici içinde dosyayı açmak için aşağıdaki komutu kullanabilirsiniz:
+        
+nano publisher_member_function.py
+
+Eğer nano kullanmak istemiyorsanız, tercih ettiğiniz metin düzenleyiciyi kullanabilirsiniz. Örneğin, gedit publisher_member_function.py veya code publisher_member_function.py gibi komutlar kullanılabilir.
+
+    Dosyayı açtıktan sonra, içeriğini görebilirsiniz. nano kullanıyorsanız, yukarı ve aşağı ok tuşlarıyla gezinebilirsiniz. Dosyanın içeriğini okumak için yukarı ve aşağı ok tuşlarına basarak kaydırabilirsiniz.
+    Eğer bir metin düzenleyici kullanıyorsanız, dosyanın içeriğini görmek için normal bir şekilde kaydırabilir ve inceleyebilirsiniz.
+    
+    Dosyanın içeriği, ROS 2'de bir Python yayıncı düğümü oluşturan basit bir kod içerir. Bu kod, belirli bir aralıkta "Hello World" mesajlarını yayınlar.
+    
+----------------
+
+Yayıncı Düğümü İnşa ve Çalıştırma:
+
+    ros2_ws dizininde, yeni paketinizi derleyin:
+
+cd ~/ros2_ws
+
+Aşağıdaki komutla paketi derleyebilirsiniz:
+
+colcon build --packages-select py_pubsub
+
+Derleme işleminden sonra, aşağıdaki komut ile kaynak dosyalarını etkinleştirin:
+
+source install/setup.bash
+
+paketin Çalıştığını Kontrol Etme (Opsiyonel):
+
+    Derleme başarılı olduysa, şu komutları kullanarak paketinizi çalıştırabilir ve test edebilirsiniz:
+    
+    ros2 run py_pubsub talker
+
+    ros2 run py_pubsub listener
+
+Eğer her şey düzgün çalışıyorsa, Hello World mesajlarını görmelisiniz.
+
